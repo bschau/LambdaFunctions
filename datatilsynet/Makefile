@@ -1,4 +1,4 @@
-FUNCTION	=	kwed
+FUNCTION	=	datatilsynet
 
 all:	clean lint
 
