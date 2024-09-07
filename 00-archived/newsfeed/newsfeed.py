@@ -8,6 +8,9 @@ import requests
 from sendmail import SendMail
 
 
+USER_AGENT = "blogtrottr/2.0"
+
+
 def handler(event, context):
     # pylint: disable=W0612,W0613
     """ Lambda function handler.
@@ -95,8 +98,32 @@ class Newsfeed():
             self.html = self.html + exception + '</p>'
             return line_number
 
+        headers = {'User-Agent': USER_AGENT, 'Connection': 'close'}
+        try:
+            data = requests.get(feed["RssUrl"],
+                                headers=headers,
+                                timeout=30).content.strip()
+        except requests.exceptions.Timeout:
+            self.html = self.html + '<h1><a href="' + feed["WebUrl"]
+            self.html = self.html + '">' + feed["Name"] + "</a></h1>"
+            self.html = self.html + '<p style="color: red">'
+            self.html = self.html + 'Timeout - waited 30 seconds</p>'
+            return line_number
+        except requests.exceptions.RequestException as req_exc:
+            self.html = self.html + '<h1><a href="' + feed["WebUrl"]
+            self.html = self.html + '">' + feed["Name"] + "</a></h1>"
+            self.html = self.html + '<p style="color: red">'
+            self.html = self.html + str(req_exc) + '</p>'
+            return line_number
+
+        rss = feedparse.parse(data)
         if rss.bozo > 0:
-            if not self.can_cope_with_bozo(str(rss.bozo_exception)):
+            exception = str(rss.bozo_exception)
+            if not self.can_cope_with_bozo(exception):
+                self.html = self.html + '<h1><a href="' + feed["WebUrl"]
+                self.html = self.html + '">' + feed["Name"] + "</a></h1>"
+                self.html = self.html + '<p style="color: red">'
+                self.html = self.html + exception + '</p>'
                 return line_number
 
         title_emitted = False
