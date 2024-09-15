@@ -5,7 +5,7 @@ all:	clean lint
 init:
 	-rm -fr package
 	pip3 install --target=./package -r requirements.txt
-	cp ~/.lambda-twoday.json settings.json
+	cp ~/.lambda.json settings.json
 
 lint:
 	-pylint --rcfile=../pylintrc *.py

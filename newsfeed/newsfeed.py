@@ -89,15 +89,6 @@ class Newsfeed():
                 feed: feed
                 cut_off: cut off datetime
         """
-        request_headers = {'Accept-Language': 'da, en'}
-        try:
-            rss = feedparser.parse(feed["RssUrl"],
-                                   request_headers=request_headers)
-        except requests.exceptions.RequestException as exception:
-            self.html = self.html + '<p style="color: red">'
-            self.html = self.html + exception + '</p>'
-            return line_number
-
         headers = {'User-Agent': USER_AGENT, 'Connection': 'close'}
         try:
             data = requests.get(feed["RssUrl"],
@@ -116,7 +107,7 @@ class Newsfeed():
             self.html = self.html + str(req_exc) + '</p>'
             return line_number
 
-        rss = feedparse.parse(data)
+        rss = feedparser.parse(data)
         if rss.bozo > 0:
             exception = str(rss.bozo_exception)
             if not self.can_cope_with_bozo(exception):
@@ -156,12 +147,12 @@ class Newsfeed():
                 title: title of news
                 url: deep link to article
         """
-        color = '#efe' if line_number % 2 == 1 else '#fff'
-        self.html = self.html + '<tr><td style="background-color: '
-        self.html = self.html + color
-        self.html = self.html + ';padding:0.5em;font-size:120%"><a href="'
+        self.html = self.html + '<tr><td style="border: 1px solid #adadad;'
+        self.html = self.html + 'background-color: #f3f1ec; color: #666;'
+        self.html = self.html + 'padding:0.5em;font-size:120%"><a href="'
         self.html = self.html + url
-        self.html = self.html + '">' + title + '</a></td></tr>\r\n'
+        self.html = self.html + '">' + title + '</a>'
+        self.html = self.html + '</td></tr>\r\n'
         line_number = line_number + 1
         return line_number
 
